@@ -12,31 +12,33 @@ import (
 
 type RedirectHandler interface {
 	Get(http.ResponseWriter, *http.Request)
-	Post( http.ResponseWriter, *http.Request)
+	Post(http.ResponseWriter, *http.Request)
 }
 
 type handler struct {
 	redirectService shortener.RedirectService
 }
 
-func NewHandler(redirectService shortener.RedirectService)  RedirectHandler {
+func NewHandler(redirectService shortener.RedirectService) RedirectHandler {
 	return &handler{redirectService: redirectService}
 }
 
-func setupResponse(w http.ResponseWriter,contentType string,body []byte, statusCode int)  {
-	w.Header().Set("Content-Type",contentType)
+func setupResponse(w http.ResponseWriter, contentType string, body []byte, statusCode int) {
+	w.Header().Set("Content-Type", contentType)
+	w.WriteHeader(statusCode)
 	_, err := w.Write(body)
-	if err != nil{
+	if err != nil {
 		log.Println(err)
 	}
 }
 
-func (h *handler) serializer(contentType string) *js.Redirect {
-	if contentType != "application/json"{
-		log.Println("something went worng")
+func (h *handler) serializer(contentType string) shortener.RedirectSerializer {
+	if contentType == "application/x-msgpack" {
+
 	}
 	return &js.Redirect{}
 }
+
 
 func (h *handler) Get(w http.ResponseWriter, r *http.Request)  {
 	code := chi.URLParam(r,"code")
@@ -52,31 +54,31 @@ func (h *handler) Get(w http.ResponseWriter, r *http.Request)  {
 	http.Redirect(w,r,redirect.URL,http.StatusMovedPermanently)
 }
 
-func (h *handler) Post(w http.ResponseWriter, r *http.Request)  {
+func (h *handler) Post(w http.ResponseWriter, r *http.Request) {
 	contentType := r.Header.Get("Content-Type")
 	requestBody, err := ioutil.ReadAll(r.Body)
-	if err != nil{
-		http.Error(w, http.StatusText(http.StatusInternalServerError),http.StatusInternalServerError)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	redirect  := h.serializer(contentType).Decode(requestBody)
-	if err != nil{
-		http.Error(w, http.StatusText(http.StatusInternalServerError),http.StatusInternalServerError)
+	redirect, err := h.serializer(contentType).Decode(requestBody)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	err = h.redirectService.Store(redirect)
-	if err != nil{
-		if errors.Cause(err) == shortener.ErrRedirectInvalid{
-			http.Error(w,http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+	if err != nil {
+		if errors.Cause(err) == shortener.ErrRedirectInvalid {
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 			return
 		}
-		http.Error(w,http.StatusText(http.StatusInternalServerError),http.StatusInternalServerError)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	responseBody, err := h.serializer(contentType).Encode(redirect)
-	if err != nil{
-		http.Error(w,http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	setupResponse(w,contentType,requestBody,http.StatusCreated)
+	setupResponse(w, contentType, responseBody, http.StatusCreated)
 }

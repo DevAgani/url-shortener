@@ -5,3 +5,10 @@ type Redirect struct{
 	URL string `json:"url" bson:"url" validate:"empty=false & format=url"`
 	CreatedAt int64 `json:"created_at" bson:"created_at"`
 }
+
+
+type Keys struct{
+	MongoURL string
+	MongoTimeout string
+	MongoDB string
+}
