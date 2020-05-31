@@ -2,7 +2,7 @@ package json
 
 import (
 	"encoding/json"
-	"github.com/DevAgani/url-shortener/pkg/shortener"
+	"github.com/DevAgani/url-shortener/shortener"
 	"github.com/pkg/errors"
 )
 

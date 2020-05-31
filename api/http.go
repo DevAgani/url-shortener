@@ -1,8 +1,8 @@
 package api
 
 import (
-	js "github.com/DevAgani/url-shortener/internal/serializer/json"
-	"github.com/DevAgani/url-shortener/internal/shortener"
+	js "github.com/DevAgani/url-shortener/serializer/json"
+	"github.com/DevAgani/url-shortener/shortener"
 	"github.com/go-chi/chi"
 	"github.com/pkg/errors"
 	"io/ioutil"

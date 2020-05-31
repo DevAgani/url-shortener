@@ -2,7 +2,7 @@ package mongo
 
 import (
 	"context"
-	"github.com/DevAgani/url-shortener/internal/shortener"
+	"github.com/DevAgani/url-shortener/shortener"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
